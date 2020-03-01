@@ -1,0 +1,63 @@
+---
+title: "PDF"
+author: "Diego Arias"
+date: "2/29/2020"
+output: bookdown::pdf_document2
+bibliography: "bib.bib"
+biblio-style: "apalike"
+link_citations: true
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::write_bib(c("knitr", "stringr"), "bib.bib", width = 60)
+library(tidyverse)
+library(stargazer)
+library(gt)
+library(bibtex)
+```
+
+This is my pdf document. Please refer to the Github repository of my final project for further information.^[[Github repository](https://github.com/Diego-arias/1006-milestone-6)] I make use of @R-knitr and @R-stringr
+
+# Experiment results
+
+```{r fake_data, echo=FALSE}
+Treatment <- rbinom(20, 1, .5)
+Depression <- rnorm(20, 16, 1.7)
+Sleep <- rnorm(20, 6, 1)
+
+data = tibble(Treatment, Depression, Sleep)
+table <- data %>% 
+  gt() %>%
+  tab_header(
+    title = "Depression",
+    subtitle = "Judging effect of treatment on depression, while looking at sleep"
+  ) %>%
+  fmt_number(columns = vars(Depression)
+             ) %>%
+  tab_footnote(footnote = "Depression is measured on a 25 point inventory scale", locations = cells_column_labels(columns = vars(Depression))) %>%
+  tab_footnote(footnote = "0 = No Treatment, 1 = Treatment", locations = cells_column_labels(columns = vars(Treatment))) %>%
+  cols_label(
+    Treatment = "Treatment",
+    Depression = "Depression",
+    Sleep = "Hours of Sleep"
+    
+  ) %>%
+  cols_move(vars(Sleep), vars(Treatment)) %>%
+  cols_align("center")
+table
+
+m1 <- lm(Depression ~ Sleep, data = data )
+m2 <- lm(Depression ~ Sleep + Depression, data = data )
+```
+# Summarizing results of treatment and sleep on depression
+
+```{r stargazer, results="asis", echo=FALSE}
+stargazer(m1, m2, header = FALSE,
+          dep.var.labels=c("Depression"),
+          covariate.labels=c("Treatment", "Hours of Sleep"))
+```
+
+
+# References
